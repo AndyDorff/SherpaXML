@@ -1,0 +1,5 @@
+suites:
+  SherpaXML:
+    namespace: AndyDorff\SherpaXML
+    psr4_prefix: AndyDorff\SherpaXML
+bootstrap: vendor/autoload.php

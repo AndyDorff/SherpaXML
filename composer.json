@@ -1,0 +1,22 @@
+{
+    "name": "andydorff/sherpa-xml",
+    "description": "",
+    "type": "library",
+    "require-dev": {
+        "phpspec/phpspec": "^6.2",
+        "phpunit/phpunit": "^9.3"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Andy Dorff",
+            "email": "andrew.dorofieiev@gmail.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "AndyDorff\\SherpaXML\\": "src/"
+        }
+    }
+}

@@ -3,28 +3,19 @@
 namespace spec\AndyDorff\SherpaXML;
 
 use AndyDorff\SherpaXML\Parser;
-use PhpSpec\Exception\Exception;
+use AndyDorff\SherpaXML\SherpaXML;
 use PhpSpec\ObjectBehavior;
 
 class ParserSpec extends ObjectBehavior
 {
+    /**
+     * @var SherpaXML
+     */
     private $xml;
 
     function let()
     {
-        $this->xml  = <<<XML
-<?xml version="1.0" encoding="UTF-8"?>
-<XML>
-    <Groups>
-        <Group1>Value1</Group1>
-        <Group2>
-            Value2
-            <Group1>Value2.1</Group1>
-        </Group2>
-        <Group3>Value3</Group3>
-    </Groups>
-</XML>
-XML;
+        $this->xml = SherpaXML::open(__DIR__.'/resources/sample.xml');
         $this->beConstructedWith($this->xml);
     }
 
@@ -33,14 +24,16 @@ XML;
         $this->shouldHaveType(Parser::class);
     }
 
-    function it_should_be_constructed_with_xml_string()
+    function it_should_parse_given_xml(\SplHeap $heap)
     {
-        $this->shouldNotThrow(\Exception::class)->duringInstantiation();
-    }
+        $this->xml->on('letter', function() use ($heap){
+            $heap->getWrappedObject()->insert(true);
+        });
 
-    function it_should_be_constructed_with_valid_xml_string()
-    {
-        $this->beConstructedWith('<a>NO XML STRING</b>');
-        $this->shouldThrow(\Exception::class)->duringInstantiation();
+        $result = $this->parse();
+
+        $heap->insert(true)->shouldHaveBeenCalled();
+        $result->parseCount->shouldBe(1);
+        $result->totalCount->shouldBe(15);
     }
 }

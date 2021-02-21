@@ -4,7 +4,8 @@
     "type": "library",
     "require-dev": {
         "phpspec/phpspec": "^6.2",
-        "phpunit/phpunit": "^9.3"
+        "phpunit/phpunit": "^9.3",
+        "symfony/var-dumper": "^5.2"
     },
     "license": "MIT",
     "authors": [
@@ -13,10 +14,14 @@
             "email": "andrew.dorofieiev@gmail.com"
         }
     ],
-    "require": {},
+    "require": {
+      "ext-xmlreader": "*",
+        "ext-simplexml": "*"
+    },
     "autoload": {
         "psr-4": {
-            "AndyDorff\\SherpaXML\\": "src/"
+            "AndyDorff\\SherpaXML\\": "src/",
+            "spec\\AndyDorff\\SherpaXML\\": "spec/"
         }
     }
 }

@@ -5,8 +5,6 @@ namespace spec\AndyDorff\SherpaXML;
 use AndyDorff\SherpaXML\Exceptions\FileNotFoundException;
 use AndyDorff\SherpaXML\Exceptions\InvalidXMLFileException;
 use AndyDorff\SherpaXML\Handler\Handler;
-use AndyDorff\SherpaXML\Handler\HandlerId;
-use AndyDorff\SherpaXML\Interfaces\HandlersCollectionInterface;
 use AndyDorff\SherpaXML\SherpaXML;
 use PhpSpec\ObjectBehavior;
 

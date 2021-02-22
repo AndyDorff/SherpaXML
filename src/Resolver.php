@@ -6,7 +6,6 @@ namespace AndyDorff\SherpaXML;
 
 use AndyDorff\SherpaXML\Handler\AbstractHandler;
 use AndyDorff\SherpaXML\Handler\Handler;
-use AndyDorff\SherpaXML\Handler\HandlerId;
 use AndyDorff\SherpaXML\Handler\SimpleXMLHandler;
 use ReflectionFunction;
 
@@ -34,6 +33,7 @@ final class Resolver
         switch($this->getClosureType($reflection)){
             case 'simple_xml':
                 $handler = new SimpleXMLHandler();
+                $handler->delegate($closure);
                 break;
             default:
                 $handler = new Handler($closure);

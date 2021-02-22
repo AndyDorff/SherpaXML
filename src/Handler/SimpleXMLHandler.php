@@ -11,10 +11,10 @@ class SimpleXMLHandler extends AbstractHandler
     public function __construct(\SimpleXMLElement $xml = null)
     {
         $this->xml = $xml;// ?? new \SimpleXMLElement('');
+        parent::__construct();
     }
 
     protected function handle()
     {
-        return $this->xml;
     }
 }

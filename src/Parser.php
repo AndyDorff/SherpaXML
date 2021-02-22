@@ -2,6 +2,7 @@
 
 namespace AndyDorff\SherpaXML;
 
+use AndyDorff\SherpaXML\Handler\SimpleXMLHandler;
 use AndyDorff\SherpaXML\Misc\ParseResult;
 use XMLReader;
 
@@ -45,7 +46,12 @@ final class Parser
     {
         $result->totalCount++;
         if($handler = $this->xml->getHandler($this->xmlReader->name)){
-            $handler->__invoke();
+            if($handler instanceof SimpleXMLHandler){
+                $simpleXml = new \SimpleXMLElement($this->xmlReader->readOuterXml());
+                $handler->__invoke($simpleXml);
+            } else {
+                $handler->__invoke();
+            }
             $result->parseCount++;
         }
     }

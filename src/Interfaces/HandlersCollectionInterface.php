@@ -4,16 +4,16 @@
 namespace AndyDorff\SherpaXML\Interfaces;
 
 
-use AndyDorff\SherpaXML\Handler\Handler;
+use AndyDorff\SherpaXML\Handler\AbstractHandler;
 
 interface HandlersCollectionInterface extends \Countable
 {
     /**
-     * @return Handler[]
+     * @return AbstractHandler[]
      */
     public function all(): array;
-    public function set(string $key, Handler $handler): void;
-    public function get(string $key): ?Handler;
+    public function set(string $key, AbstractHandler $handler): void;
+    public function get(string $key): ?AbstractHandler;
     public function remove(string $key): void;
 
     public function equals(HandlersCollectionInterface $handlers): bool;

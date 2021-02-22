@@ -5,7 +5,13 @@ namespace spec\AndyDorff\SherpaXML;
 use AndyDorff\SherpaXML\Parser;
 use AndyDorff\SherpaXML\SherpaXML;
 use PhpSpec\ObjectBehavior;
+use Prophecy\Prophet;
 
+/**
+ * Class ParserSpec
+ * @package spec\AndyDorff\SherpaXML
+ * @mixin Parser
+ */
 class ParserSpec extends ObjectBehavior
 {
     /**
@@ -35,5 +41,22 @@ class ParserSpec extends ObjectBehavior
         $heap->insert(true)->shouldHaveBeenCalled();
         $result->parseCount->shouldBe(1);
         $result->totalCount->shouldBe(15);
+    }
+
+    /**
+     * @param \SplHeap $heap
+     */
+    function it_should_parse_xml_on_SimpleXml_demand(\SplHeap $heap)
+    {
+        $simpleXml = null;
+        $this->xml->on('letter', function(\SimpleXMLElement $xml) use ($heap, &$simpleXml){
+            $heap->getWrappedObject()->insert($xml);
+            $simpleXml = $xml;
+        });
+
+        $result = $this->parse();
+
+        $heap->insert($simpleXml)->shouldHaveBeenCalled();
+        $result->parseCount->shouldBe(1);
     }
 }

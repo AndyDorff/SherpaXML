@@ -4,6 +4,7 @@
 namespace AndyDorff\SherpaXML\HandlerCollections;
 
 
+use AndyDorff\SherpaXML\Handler\AbstractHandler;
 use AndyDorff\SherpaXML\Handler\Handler;
 use AndyDorff\SherpaXML\Interfaces\HandlersCollectionInterface;
 
@@ -18,7 +19,7 @@ final class InMemoryHandlersCollection implements HandlersCollectionInterface
 
     private function setHandlers(array $handlers): void
     {
-        array_walk($handlers, function(Handler $handler, string $key){
+        array_walk($handlers, function(AbstractHandler $handler, string $key){
             $this->set($key, $handler);
         });
         reset($handlers);
@@ -29,12 +30,12 @@ final class InMemoryHandlersCollection implements HandlersCollectionInterface
         return $this->handlers;
     }
 
-    public function set(string $key, Handler $handler): void
+    public function set(string $key, AbstractHandler $handler): void
     {
         $this->handlers[$key] = $handler;
     }
 
-    public function get(string $key): ?Handler
+    public function get(string $key): ?AbstractHandler
     {
         return $this->handlers[$key] ?? null;
     }

@@ -62,16 +62,21 @@ final class SherpaXML
         return $this->xmlReader;
     }
 
-    public function handlers(): HandlersCollectionInterface
+    public function handlers(): array
     {
-        return $this->handlers->replicate();
+        return $this->handlers->all();
     }
 
     public function on(string $tagName, $handler): Handler
     {
-        $handler = $this->handlerResolver->resolve($handler, HandlerId::fromString($tagName));
-        $this->handlers->put($handler);
+        $handler = $this->handlerResolver->resolve($handler);
+        $this->handlers->set($tagName, $handler);
 
         return $handler;
+    }
+
+    public function getHandler(string $tagName): ?Handler
+    {
+        return $this->handlers->get($tagName);
     }
 }

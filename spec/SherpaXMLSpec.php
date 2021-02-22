@@ -4,6 +4,8 @@ namespace spec\AndyDorff\SherpaXML;
 
 use AndyDorff\SherpaXML\Exceptions\FileNotFoundException;
 use AndyDorff\SherpaXML\Exceptions\InvalidXMLFileException;
+use AndyDorff\SherpaXML\Handler\Handler;
+use AndyDorff\SherpaXML\Handler\HandlerId;
 use AndyDorff\SherpaXML\Interfaces\HandlersCollectionInterface;
 use AndyDorff\SherpaXML\SherpaXML;
 use PhpSpec\ObjectBehavior;
@@ -54,15 +56,14 @@ class SherpaXMLSpec extends ObjectBehavior
 
     function it_should_return_all_registered_handlers()
     {
-        $this->handlers()->shouldBeAnInstanceOf(HandlersCollectionInterface::class);
+        $this->handlers()->shouldBeArray();
     }
 
-    function it_should_register_callback_for_xml_tag()
+    function it_should_register_handler_for_xml_tag()
     {
-        $this->on('letter', function(\SimpleXMLElement $xml){
-            return $xml;
-        });
+        $handler = new Handler();
+        $this->on('letter', $handler);
+        $this->getHandler('letter')->shouldReturn($handler);
     }
-
 
 }

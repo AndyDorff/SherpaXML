@@ -2,23 +2,18 @@
 
 namespace AndyDorff\SherpaXML;
 
-use AndyDorff\SherpaXML\Handler\HandlerId;
-use AndyDorff\SherpaXML\Interfaces\HandlersCollectionInterface;
 use AndyDorff\SherpaXML\Misc\ParseResult;
 use XMLReader;
 
 final class Parser
 {
+    private SherpaXML $xml;
     private XMLReader $xmlReader;
-    /**
-     * @var HandlersCollectionInterface
-     */
-    private HandlersCollectionInterface $handlers;
 
     public function __construct(SherpaXML $xml)
     {
+        $this->xml = $xml;
         $this->xmlReader = $xml->xmlReader();
-        $this->handlers = $xml->handlers();
     }
 
     public function parse(): ParseResult
@@ -49,7 +44,7 @@ final class Parser
     private function doParse(ParseResult $result): void
     {
         $result->totalCount++;
-        if($handler = $this->handlers->get(HandlerId::fromString($this->xmlReader->name))){
+        if($handler = $this->xml->getHandler($this->xmlReader->name)){
             $handler->__invoke();
             $result->parseCount++;
         }

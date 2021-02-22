@@ -5,7 +5,6 @@ namespace AndyDorff\SherpaXML\HandlerCollections;
 
 
 use AndyDorff\SherpaXML\Handler\Handler;
-use AndyDorff\SherpaXML\Handler\HandlerId;
 use AndyDorff\SherpaXML\Interfaces\HandlersCollectionInterface;
 
 final class InMemoryHandlersCollection implements HandlersCollectionInterface
@@ -19,7 +18,9 @@ final class InMemoryHandlersCollection implements HandlersCollectionInterface
 
     private function setHandlers(array $handlers): void
     {
-        array_walk($handlers, [$this, 'put']);
+        array_walk($handlers, function(Handler $handler, string $key){
+            $this->set($key, $handler);
+        });
         reset($handlers);
    }
 
@@ -28,35 +29,25 @@ final class InMemoryHandlersCollection implements HandlersCollectionInterface
         return $this->handlers;
     }
 
-    public function put(Handler $handler): void
+    public function set(string $key, Handler $handler): void
     {
-        $this->handlers[strval($handler->id())] = $handler;
+        $this->handlers[$key] = $handler;
     }
 
-    public function get(HandlerId $handlerId): ?Handler
+    public function get(string $key): ?Handler
     {
-        return $this->offsetGet($handlerId);
+        return $this->handlers[$key] ?? null;
     }
 
-    private function offsetGet(string $offset): ?Handler
-    {
-        return ($this->handlers[$offset] ?? null);
-    }
-
-    public function remove(HandlerId $handlerId): void
+    public function remove(string $key): void
     {
         // TODO: Implement remove() method.
     }
 
-    public function replicate(): HandlersCollectionInterface
-    {
-        return new self($this->handlers);
-    }
-
     public function equals(HandlersCollectionInterface $handlers): bool
     {
-        foreach($this->all() as $handler){
-            if(!$handlers->get($handler->id())){
+        foreach($this->all() as $key => $handler){
+            if(!$handlers->get($key)){
                 return false;
             }
         }
@@ -66,6 +57,6 @@ final class InMemoryHandlersCollection implements HandlersCollectionInterface
 
     public function count()
     {
-        return count($this->all());
+        return count($this->handlers);
     }
 }

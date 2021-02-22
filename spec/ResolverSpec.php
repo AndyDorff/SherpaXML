@@ -4,8 +4,10 @@ namespace spec\AndyDorff\SherpaXML;
 
 use AndyDorff\SherpaXML\Handler\Handler;
 use AndyDorff\SherpaXML\Handler\HandlerId;
+use AndyDorff\SherpaXML\Handler\SimpleXMLHandler;
 use AndyDorff\SherpaXML\Resolver;
 use PhpSpec\ObjectBehavior;
+use SimpleXMLElement;
 
 /**
  * Class ResolverSpec
@@ -21,17 +23,27 @@ class ResolverSpec extends ObjectBehavior
 
     function it_should_resolve_callback_handler()
     {
-        foreach([null, HandlerId::fromString('XmlTag')] as $i => $handlerId){
-            $handler = $this->resolve(function(){
-                return true;
-            }, $handlerId);
+        $handler = $this->resolve(function(){
+            return true;
+        });
 
-            $handler->shouldBeAnInstanceOf(Handler::class);
-            if($i){
-                $handler->id()->shouldBe($handlerId);
-            } else {
-                $handler->id()->shouldNotBe(null);
-            }
-        }
+        $handler->shouldBeAnInstanceOf(Handler::class);
     }
+
+    function it_should_resolve_Handler_handler()
+    {
+        $handler = new Handler();
+
+        $this->resolve($handler)->shouldReturn($handler);
+    }
+
+    function it_should_resolve_SimpleXML_handler(\SplHeap $heap)
+    {
+        $handler = $this->resolve(function (SimpleXMLElement $xml) {
+            return true;
+        });
+
+        $handler->shouldBeAnInstanceOf(SimpleXMLHandler::class);
+    }
+
 }

@@ -18,31 +18,23 @@ class InMemoryHandlersCollectionSpec extends ObjectBehavior
     {
         $this->shouldNotThrow(\Throwable::class)->duringInstantiation();
         $this->beConstructedWith($handlers = [
-            new Handler(new HandlerId())
+            new Handler()
         ]);
         $this->all()->shouldHaveCount(count($handlers));
     }
 
     function it_should_check_equality_with_another_handlers_collection()
     {
-        $handlers = [new Handler(new HandlerId())];
+        $handlers = [new Handler()];
         $this->beConstructedWith($handlers);
 
         $sameHandlers = new InMemoryHandlersCollection($handlers);
         $anotherHandlers = new InMemoryHandlersCollection([
-            new Handler(new HandlerId()),
-            new Handler(new HandlerId())
+            new Handler(),
+            new Handler()
         ]);
 
         $this->equals($sameHandlers)->shouldReturn(true);
         $this->equals($anotherHandlers)->shouldReturn(false);
-    }
-
-    function it_should_replicate_itself_to_return_new_instance()
-    {
-        $handlers = $this->replicate();
-
-        $handlers->shouldNotBe($this->getWrappedObject());
-        $this->equals($handlers)->shouldReturn(true);
     }
 }

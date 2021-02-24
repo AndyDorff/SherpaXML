@@ -32,8 +32,7 @@ final class Resolver
         $reflection = new ReflectionFunction(\Closure::fromCallable($handler));
         switch($this->getClosureType($reflection)){
             case 'simple_xml':
-                $handler = new SimpleXMLHandler();
-                $handler->delegate($closure);
+                $handler = new SimpleXMLHandler($closure);
                 break;
             default:
                 $handler = new Handler($closure);

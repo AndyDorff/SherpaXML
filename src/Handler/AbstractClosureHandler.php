@@ -6,16 +6,16 @@ namespace AndyDorff\SherpaXML\Handler;
 
 abstract class AbstractClosureHandler extends AbstractHandler
 {
-    private \Closure $closure;
+    private \Closure $handle;
 
-    public function __construct(\Closure $closure)
+    public function __construct(\Closure $handle)
     {
         parent::__construct();
-        $this->closure = $closure;
+        $this->handle = $handle;
     }
 
     public function handle()
     {
-        return $this->closure->call($this);
+        return call_user_func_array($this->handle, func_get_args());
     }
 }

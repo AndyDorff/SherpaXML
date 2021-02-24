@@ -2,10 +2,13 @@
 
 namespace spec\AndyDorff\SherpaXML;
 
+use AndyDorff\SherpaXML\Handler\AbstractHandler;
+use AndyDorff\SherpaXML\Handler\SimpleXMLHandler;
 use AndyDorff\SherpaXML\Parser;
 use AndyDorff\SherpaXML\SherpaXML;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Prophet;
+use SimpleXMLElement;
 
 /**
  * Class ParserSpec
@@ -43,20 +46,33 @@ class ParserSpec extends ObjectBehavior
         $result->totalCount->shouldBe(15);
     }
 
-    /**
-     * @param \SplHeap $heap
-     */
-    function it_should_parse_xml_on_SimpleXml_demand(\SplHeap $heap)
+    function it_should_resolve_handle_params_during_parse(\SplHeap $heap)
     {
-        $simpleXml = null;
-        $this->xml->on('letter', function(\SimpleXMLElement $xml) use ($heap, &$simpleXml){
-            $heap->getWrappedObject()->insert($xml);
-            $simpleXml = $xml;
+        $this->xml->on('letter', function (SherpaXML $sherpaXML, SimpleXMLElement $xml) use ($heap){
+            $heap->getWrappedObject()->insert(true);
         });
 
-        $result = $this->parse();
+        $this->parse();
 
-        $heap->insert($simpleXml)->shouldHaveBeenCalled();
-        $result->parseCount->shouldBe(1);
+        $heap->insert(true)->shouldHaveBeenCalled();
     }
+
+    function it_should_resolve_Handler_params_during_parse(\SplHeap $heap)
+    {
+        $this->xml->on('letter', new class($heap) extends AbstractHandler{
+            private \SplHeap $heap;
+            public function __construct($heap){
+                parent::__construct();
+                $this->heap = $heap->getWrappedObject();
+            }
+            public function handle(SherpaXML $sherpaXML, SimpleXMLElement $xml){
+                $this->heap->insert(true);
+            }
+        });
+
+        $this->parse();
+
+        $heap->insert(true)->shouldHaveBeenCalled();
+    }
+
 }

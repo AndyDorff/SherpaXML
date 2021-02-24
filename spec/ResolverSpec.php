@@ -2,10 +2,10 @@
 
 namespace spec\AndyDorff\SherpaXML;
 
+use AndyDorff\SherpaXML\Handler\AbstractHandler;
 use AndyDorff\SherpaXML\Handler\Handler;
-use AndyDorff\SherpaXML\Handler\HandlerId;
-use AndyDorff\SherpaXML\Handler\SimpleXMLHandler;
 use AndyDorff\SherpaXML\Resolver;
+use AndyDorff\SherpaXML\SherpaXML;
 use PhpSpec\ObjectBehavior;
 use SimpleXMLElement;
 
@@ -30,20 +30,15 @@ class ResolverSpec extends ObjectBehavior
         $handler->shouldBeAnInstanceOf(Handler::class);
     }
 
-    function it_should_resolve_Handler_handler()
+    function it_should_resolve_any_AbstractHandler_handler()
     {
-        $handler = new Handler();
+        $handler = new class extends AbstractHandler{
+            public function handle()
+            {
+                return true;
+            }
+        };
 
         $this->resolve($handler)->shouldReturn($handler);
     }
-
-    function it_should_resolve_SimpleXML_handler(\SplHeap $heap)
-    {
-        $handler = $this->resolve(function (SimpleXMLElement $xml) {
-            return true;
-        });
-
-        $handler->shouldBeAnInstanceOf(SimpleXMLHandler::class);
-    }
-
 }

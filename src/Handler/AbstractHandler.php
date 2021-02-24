@@ -4,19 +4,15 @@
 namespace AndyDorff\SherpaXML\Handler;
 
 
-abstract class AbstractHandler
+/**
+ * Class AbstractHandler
+ * @package AndyDorff\SherpaXML\Handler
+ * @method handle()
+ */
+abstract class AbstractHandler extends AbstractClosureHandler
 {
     public function __construct()
     {
-    }
-
-    abstract protected function handle();
-
-    /**
-     * @return mixed
-     */
-    final public function __invoke()
-    {
-        return call_user_func_array([$this, 'handle'], func_get_args());
+        parent::__construct(\Closure::fromCallable([$this, 'handle']));
     }
 }

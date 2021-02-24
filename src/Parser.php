@@ -2,8 +2,8 @@
 
 namespace AndyDorff\SherpaXML;
 
-use AndyDorff\SherpaXML\Handler\SimpleXMLHandler;
 use AndyDorff\SherpaXML\Misc\ParseResult;
+use ReflectionFunction;
 use XMLReader;
 
 final class Parser
@@ -46,14 +46,31 @@ final class Parser
     {
         $result->totalCount++;
         if($handler = $this->xml->getHandler($this->xmlReader->name)){
-            if($handler instanceof SimpleXMLHandler){
-                $simpleXml = new \SimpleXMLElement($this->xmlReader->readOuterXml());
-                $handler->__invoke($simpleXml);
-            } else {
-                $handler->__invoke();
-            }
+            $params = $this->resolveHandleParams($handler->asClosure());
+            $handler->__invoke(...$params);
             $result->parseCount++;
         }
+    }
+
+    private function resolveHandleParams(\Closure $handle)
+    {
+        $result = [];
+        $handle = new ReflectionFunction($handle);
+        foreach($handle->getParameters() as $key => $parameter){
+            $name = $parameter->getType()->getName();
+            switch($name){
+                case \SimpleXMLElement::class:
+                    $result[$key] = new \SimpleXMLElement($this->xmlReader->readOuterXml());
+                    break;
+                case SherpaXML::class:
+                    $result[$key] = new SherpaXML($this->xmlReader);
+                    break;
+                default:
+                    $result[$key] = null;
+            }
+        }
+
+        return $result;
     }
 
 }

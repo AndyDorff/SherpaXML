@@ -32,4 +32,20 @@ class HandlerSpec extends ObjectBehavior
 
         $heap->insert(true)->shouldHaveBeenCalled();
     }
+
+    function it_should_return_handle_as_closure(\SplHeap $heap)
+    {
+        $this->beConstructedWith(function() use ($heap){
+            $heap->getWrappedObject()->insert(true);
+        });
+
+        /**
+         * @var \Closure $closure
+         */
+        $closure = $this->asClosure();
+        $closure->call($this->getWrappedObject());
+
+        $closure->shouldBeAnInstanceOf(\Closure::class);
+        $heap->insert(true)->shouldHaveBeenCalled();
+    }
 }

@@ -4,9 +4,7 @@ namespace AndyDorff\SherpaXML;
 
 use AndyDorff\SherpaXML\Exceptions\FileNotFoundException;
 use AndyDorff\SherpaXML\Exceptions\InvalidXMLFileException;
-use AndyDorff\SherpaXML\Handler\AbstractHandler;
-use AndyDorff\SherpaXML\Handler\Handler;
-use AndyDorff\SherpaXML\Handler\HandlerId;
+use AndyDorff\SherpaXML\Handler\AbstractClosureHandler;
 use AndyDorff\SherpaXML\HandlerCollections\InMemoryHandlersCollection;
 use AndyDorff\SherpaXML\Interfaces\HandlersCollectionInterface;
 use XMLReader;
@@ -68,7 +66,7 @@ final class SherpaXML
         return $this->handlers->all();
     }
 
-    public function on(string $tagName, $handler): AbstractHandler
+    public function on(string $tagName, $handler): AbstractClosureHandler
     {
         $handler = $this->handlerResolver->resolve($handler);
         $this->handlers->set($tagName, $handler);
@@ -76,7 +74,7 @@ final class SherpaXML
         return $handler;
     }
 
-    public function getHandler(string $tagName): ?AbstractHandler
+    public function getHandler(string $tagName): ?AbstractClosureHandler
     {
         return $this->handlers->get($tagName);
     }

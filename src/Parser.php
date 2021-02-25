@@ -2,6 +2,7 @@
 
 namespace AndyDorff\SherpaXML;
 
+use AndyDorff\SherpaXML\Interpreters\AbstractInterpreter;
 use AndyDorff\SherpaXML\Misc\ParseResult;
 use ReflectionFunction;
 use XMLReader;
@@ -10,11 +11,27 @@ final class Parser
 {
     private SherpaXML $xml;
     private XMLReader $xmlReader;
+    private array $interpreters = [];
 
     public function __construct(SherpaXML $xml)
     {
         $this->xml = $xml;
         $this->xmlReader = $xml->xmlReader();
+    }
+
+    public function registerMultipleInterpreters(array $interpreters): void
+    {
+        array_walk($interpreters, [$this, 'registerInterpreter']);
+    }
+
+    public function registerInterpreter(AbstractInterpreter $interpreter): void
+    {
+        $this->interpreters[$interpreter->className()] = $interpreter;
+    }
+
+    public function interpreters(): array
+    {
+        return $this->interpreters;
     }
 
     public function parse(): ParseResult
@@ -72,5 +89,4 @@ final class Parser
 
         return $result;
     }
-
 }

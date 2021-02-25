@@ -64,4 +64,24 @@ class SherpaXMLSpec extends ObjectBehavior
         $this->getHandler('letter')->shouldReturn($handler);
     }
 
+    function it_should_return_current_node()
+    {
+        $this->current();
+
+        $this->getCurrentNodeType()->shouldBe(\XMLReader::NONE);
+    }
+
+    function it_should_move_to_next_node()
+    {
+        $this->next();
+
+        $this->getCurrentNodeType()->shouldBe(\XMLReader::COMMENT);
+    }
+
+    function it_should_move_to_next_xml_element()
+    {
+        $this->moveToNextElement();
+
+        $this->getCurrentElementInfo()['name']->shouldBe('letter');
+    }
 }

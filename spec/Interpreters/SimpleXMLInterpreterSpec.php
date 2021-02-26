@@ -21,6 +21,7 @@ class SimpleXMLInterpreterSpec extends ObjectBehavior
     function it_should_interpret_SimpleXmlElement()
     {
         $xml = SherpaXML::open(__DIR__.'/../resources/sample.xml');
+        $xml->moveToNextElement();
         $result = $this->interpret($xml);
         $result->shouldBeAnInstanceOf(\SimpleXMLElement::class);
     }

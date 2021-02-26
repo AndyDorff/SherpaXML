@@ -71,25 +71,31 @@ final class SherpaXML implements \Iterator
         return $this->handlers->all();
     }
 
-    public function on(string $tagName, $handler): AbstractClosureHandler
+    public function on(string $tagPath, $handler): AbstractClosureHandler
     {
+        $tagPath = $this->getCurrentPath($tagPath);
+
         $handler = $this->handlerResolver->resolve($handler);
-        $this->handlers->set($tagName, $handler);
+        $this->handlers->set($tagPath, $handler);
 
         return $handler;
     }
 
-    public function getHandler(string $tagName): ?AbstractClosureHandler
+    public function getHandler(string $tagPath): ?AbstractClosureHandler
     {
-        return $this->handlers->get($tagName);
+        if(substr($tagPath, 0, 1) !== '/'){
+            $tagPath = $this->getCurrentPath($tagPath);
+        }
+
+        return $this->handlers->get($tagPath);
     }
 
-    public function moveToNextElement(): void
+    public function moveToNextElement(): bool
     {
-        $this->moveToNextNodeByType(XMLReader::ELEMENT);
+        return $this->moveToNextNodeByType(XMLReader::ELEMENT);
     }
 
-    public function moveToNextNodeByType(int $nodeType): void
+    public function moveToNextNodeByType(int $nodeType): bool
     {
         if($this->valid() === null) {
             $this->rewind();
@@ -103,6 +109,8 @@ final class SherpaXML implements \Iterator
             }
             $this->next();
         }
+
+        return $this->valid();
     }
 
     /**
@@ -120,10 +128,7 @@ final class SherpaXML implements \Iterator
             && $this->xmlReader->nodeType === XMLReader::ELEMENT
         ) {
             $depth = $this->xmlReader->depth;
-            $this->elementsStack[$depth] = [
-                'name' => $this->xmlReader->name,
-                'attributes' => $this->extractAttributes($this->xmlReader)
-            ];
+            $this->elementsStack[$depth] = $this->getCurrentElementInfo();
             if(count($this->elementsStack) !== $depth + 1){
                 $this->elementsStack = array_slice($this->elementsStack, 0, $depth + 1);
             }
@@ -176,10 +181,16 @@ final class SherpaXML implements \Iterator
         $this->index = 0;
     }
 
-    public function getCurrentPath(): string
+    public function getCurrentPath(string $path = null): string
     {
+        $elementsStack = $this->elementsStack;
+        if($path){
+            $elementsStack[] = ['name' => rtrim($path, '/')];
+        }
+
         return '/'.implode('/', array_map(function(array $elementData){
             return $elementData['name'];
-        }, $this->elementsStack));
+        }, $elementsStack));
+
     }
 }

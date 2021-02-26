@@ -5,6 +5,7 @@ namespace spec\AndyDorff\SherpaXML;
 use AndyDorff\SherpaXML\Exceptions\FileNotFoundException;
 use AndyDorff\SherpaXML\Exceptions\InvalidXMLFileException;
 use AndyDorff\SherpaXML\Handler\Handler;
+use AndyDorff\SherpaXML\Parser;
 use AndyDorff\SherpaXML\SherpaXML;
 use PhpSpec\ObjectBehavior;
 
@@ -59,9 +60,16 @@ class SherpaXMLSpec extends ObjectBehavior
 
     function it_should_register_handler_for_xml_tag()
     {
-        $handler = new Handler();
-        $this->on('letter', $handler);
-        $this->getHandler('letter')->shouldReturn($handler);
+        $handler1 = new Handler();
+        $handler2 = new Handler(function(SherpaXML $xml) use ($handler1){
+            $xml->on('title', $handler1);
+        });
+        $this->on('letter', $handler2);
+
+        (new Parser())->parse($this->getWrappedObject());
+
+        $this->getHandler('/letter')->shouldReturn($handler2);
+        $this->getHandler('/letter/title')->shouldReturn($handler1);
     }
 
     function it_should_return_current_node()
@@ -76,6 +84,18 @@ class SherpaXMLSpec extends ObjectBehavior
         $this->next();
 
         $this->getCurrentNodeType()->shouldBe(\XMLReader::COMMENT);
+    }
+
+    function it_should_be_an_Iterator()
+    {
+        $this->shouldBeAnInstanceOf(\Iterator::class);
+    }
+
+    function it_should_move_to_next_xml_node()
+    {
+        $this->moveToNextNodeByType(\XMLReader::COMMENT);
+
+        $this->getCurrentElementInfo()['name']->shouldBe('#comment');
     }
 
     function it_should_move_to_next_xml_element()

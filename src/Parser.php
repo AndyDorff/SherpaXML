@@ -16,6 +16,7 @@ final class Parser
      * @var AbstractInterpreter[]
      */
     private array $interpreters = [];
+    private bool $isBreaked = false;
 
     public function __construct(array $interpreters = [])
     {
@@ -24,6 +25,11 @@ final class Parser
             [new SimpleXMLInterpreter()],
             $interpreters
         ));
+    }
+
+    public function parseResult(): ParseResult
+    {
+        return $this->parseResult;
     }
 
     public function registerMultipleInterpreters(array $interpreters): void
@@ -49,9 +55,18 @@ final class Parser
         return ($this->interpreters[$className] ?? null);
     }
 
+    public function break(): void
+    {
+        $this->isBreaked = true;
+    }
+
     public function parse(SherpaXML $xml): ParseResult
     {
-        while($xml->moveToNextElement()){
+        $this->isBreaked = false;
+        while(
+            $xml->moveToNextElement()
+            && !$this->isBreaked
+        ){
             $this->doParse($xml);
         }
 
@@ -74,7 +89,9 @@ final class Parser
         $handle = new ReflectionFunction($handle);
         foreach($handle->getParameters() as $key => $parameter) {
             $name = $parameter->getType()->getName();
-            if ($name === ParseResult::class) {
+            if ($name === self::class){
+                $result[$key] = $this;
+            } elseif ($name === ParseResult::class) {
                 $result[$key] = $this->parseResult;
             } elseif ($name === SherpaXML::class) {
                 $result[$key] = $xml;

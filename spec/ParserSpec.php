@@ -118,4 +118,26 @@ class ParserSpec extends ObjectBehavior
         ]);
     }
 
+    function it_should_break_parse_process()
+    {
+        $this->xml->on('letter', function(SherpaXML $xml, SimpleXMLElement $xmlElement, Parser $parser){
+            $parser->parseResult()->payload['root_name'] = $xmlElement->getName();
+            $parser->break();
+
+            $xml->on('text', function(SherpaXML $xml){
+                $xml->on('component', function(SherpaXML $xml, ParseResult $result){
+                    $result->payload['text_component'][] = $xml->getCurrentElementInfo();
+                });
+            });
+        });
+
+        $result = $this->parse($this->xml);
+
+        $result->parseCount->shouldBe(1);
+        $result->totalCount->shouldBe(1);
+        $result->payload->shouldBe([
+            'root_name' => 'letter'
+        ]);
+    }
+
 }

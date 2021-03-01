@@ -178,4 +178,16 @@ class ParserSpec extends ObjectBehavior
         $result->payload['letter']->salutation->shouldBe('Dear Daniel,');
         $result->payload['letter']->component->shouldBe('Separator');
     }
+
+    function it_should_parse_with_assigning_given_value()
+    {
+        $this->xml->on('letter/text', function(SherpaXML $xml, ParseResult $result){
+            $xml->assign('emphasis', $result->payload['emphasis']);
+        });
+
+        $result = $this->parse($this->xml);
+
+        $result->payload['emphasis']->shouldBe('SDL Trados Studio 2009');
+    }
+
 }

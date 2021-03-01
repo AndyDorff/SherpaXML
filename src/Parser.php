@@ -82,7 +82,7 @@ final class Parser
     {
         $this->parseResult->totalCount++;
         $elementPath = $xml->getCurrentPath();
-        if($handler = $xml->extractHandler($elementPath)){
+        if($handler = $xml->getHandler($elementPath)){
             [$params, $deferredHandler] = $this->resolveHandleParams($handler->asClosure(), $xml);
             if($deferredHandler){
                 $deferredHandler->setHandler($handler, $params);
@@ -94,7 +94,7 @@ final class Parser
             $this->parseResult->parseCount++;
         }
 
-        return ($xml->getHandler($elementPath) !== null);
+        return ($handler !== $xml->getHandler($elementPath));
     }
 
     /**

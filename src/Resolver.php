@@ -21,4 +21,11 @@ final class Resolver
 
         return $handler;
     }
+
+    public function resolveValue(&$value): AbstractClosureHandler
+    {
+        return new Handler((function (SherpaXML $xml) use (&$value){
+            $value = $xml->xmlReader()->readInnerXml();
+        }));
+    }
 }

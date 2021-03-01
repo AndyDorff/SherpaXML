@@ -66,9 +66,24 @@ final class SherpaXML implements \Iterator
         return $this->xmlReader;
     }
 
+    public function tagPaths(): array
+    {
+        return array_keys($this->handlers->all());
+    }
+
     public function handlers(): array
     {
         return $this->handlers->all();
+    }
+
+    public function assign(string $tagPath, &$value): AbstractClosureHandler
+    {
+        $tagPath = $this->getCurrentPath($tagPath);
+
+        $handler = $this->handlerResolver->resolveValue($value);
+        $this->handlers->set($tagPath, $handler);
+
+        return $handler;
     }
 
     public function on(string $tagPath, $handler): AbstractClosureHandler
@@ -211,7 +226,7 @@ final class SherpaXML implements \Iterator
     public function getCurrentPath(string $path = null): string
     {
         $elementsStack = $this->elementsStack;
-        if($path && ($name = rtrim($path, '/'))){
+        if($path && ($name = trim($path, '/'))){
             $elementsStack[] = ['name' => $name];
         }
 

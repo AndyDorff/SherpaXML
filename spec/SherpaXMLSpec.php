@@ -5,6 +5,7 @@ namespace spec\AndyDorff\SherpaXML;
 use AndyDorff\SherpaXML\Exceptions\FileNotFoundException;
 use AndyDorff\SherpaXML\Exceptions\InvalidXMLFileException;
 use AndyDorff\SherpaXML\Handler\Handler;
+use AndyDorff\SherpaXML\Misc\ParseResult;
 use AndyDorff\SherpaXML\Parser;
 use AndyDorff\SherpaXML\SherpaXML;
 use PhpSpec\ObjectBehavior;
@@ -140,5 +141,37 @@ class SherpaXMLSpec extends ObjectBehavior
         (new Parser())->parse($this->getWrappedObject());
 
         $heap->insert(true)->shouldHaveBeenCalled();
+    }
+
+    function it_should_normalize_handlers_tag_path_while_register1()
+    {
+        $this->check_if_handlers_tag_path_normalized('letter', 'text/component');
+    }
+
+    function check_if_handlers_tag_path_normalized(string $h1, string $h2)
+    {
+        $handlers = [
+            '/letter',
+            '/letter/text/component'
+        ];
+
+        $this->on($h1, function(SherpaXML $xml) use ($h2){
+            $xml->on($h2, function(){
+            });
+        });
+
+        (new Parser())->parse($this->getWrappedObject());
+
+        $this->tagPaths()->shouldBe($handlers);
+    }
+
+    function it_should_normalize_handlers_tag_path_while_register2()
+    {
+        $this->check_if_handlers_tag_path_normalized('/letter', '/text/component');
+    }
+
+    function it_should_normalize_handlers_tag_path_while_register3()
+    {
+        $this->check_if_handlers_tag_path_normalized('/letter/', '/text/component/');
     }
 }

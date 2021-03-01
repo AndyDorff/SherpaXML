@@ -41,4 +41,10 @@ class ResolverSpec extends ObjectBehavior
 
         $this->resolve($handler)->shouldReturn($handler);
     }
+
+    function it_should_resolve_to_assign_value()
+    {
+        $value = 1;
+        $this->resolve($value)->shouldBeAnInstanceOf(Handler::class);
+    }
 }

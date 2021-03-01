@@ -20,6 +20,6 @@ abstract class AbstractClosureHandler
 
     final public function __invoke()
     {
-        $this->asClosure()->call($this, ...func_get_args());
+        return $this->asClosure()->call($this, ...func_get_args());
     }
 }

@@ -104,4 +104,41 @@ class SherpaXMLSpec extends ObjectBehavior
 
         $this->getCurrentElementInfo()['name']->shouldBe('letter');
     }
+
+    function it_should_move_to_end()
+    {
+        $this->moveToEnd();
+
+        $this->getCurrentNodeType()->shouldBe(\XMLReader::NONE);
+        $this->key()->shouldBe(59);
+
+        $this->moveToEnd();
+
+        $this->getCurrentNodeType()->shouldBe(\XMLReader::NONE);
+        $this->key()->shouldBe(59);
+    }
+
+    function it_should_extract_handler_by_tag()
+    {
+        $handler = function () { return true;};
+        $this->on('letter', $handler);
+
+        $extractedHandler = $this->extractHandler('letter');
+
+        $extractedHandler->__invoke()->shouldReturn(true);
+        $this->handlers()->shouldBe([]);
+    }
+
+    function it_should_register_handle_for_same_node_in_the_node_handler(\SplHeap $heap)
+    {
+        $this->on('letter', function(SherpaXML $xml) use ($heap){
+            $xml->on('/', function() use ($heap){
+                $heap->getWrappedObject()->insert(true);
+            });
+        });
+
+        (new Parser())->parse($this->getWrappedObject());
+
+        $heap->insert(true)->shouldHaveBeenCalled();
+    }
 }

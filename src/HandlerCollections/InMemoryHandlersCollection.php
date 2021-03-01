@@ -41,7 +41,9 @@ final class InMemoryHandlersCollection implements HandlersCollectionInterface
 
     public function remove(string $key): void
     {
-        // TODO: Implement remove() method.
+        if(array_key_exists($key, $this->handlers)){
+            unset($this->handlers[$key]);
+        }
     }
 
     public function equals(HandlersCollectionInterface $handlers): bool

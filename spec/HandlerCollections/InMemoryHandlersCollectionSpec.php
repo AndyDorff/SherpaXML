@@ -37,4 +37,14 @@ class InMemoryHandlersCollectionSpec extends ObjectBehavior
         $this->equals($sameHandlers)->shouldReturn(true);
         $this->equals($anotherHandlers)->shouldReturn(false);
     }
+
+    function it_should_remove_handler_by_key()
+    {
+        $handlers = ['handler' => new Handler()];
+        $this->beConstructedWith($handlers);
+
+        $this->remove('handler');
+
+        $this->all()->shouldReturn([]);
+    }
 }

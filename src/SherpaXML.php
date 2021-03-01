@@ -81,13 +81,40 @@ final class SherpaXML implements \Iterator
         return $handler;
     }
 
+    public function extractHandler(string $tagPath): ?AbstractClosureHandler
+    {
+        $tagPath = $this->normalizeTagPath($tagPath);
+        if($handler = $this->handlers->get($tagPath)){
+            $this->handlers->remove($tagPath);
+        }
+
+        return $handler;
+    }
+
     public function getHandler(string $tagPath): ?AbstractClosureHandler
+    {
+        $tagPath = $this->normalizeTagPath($tagPath);
+
+        return $this->handlers->get($tagPath);
+    }
+
+    private function normalizeTagPath(string $tagPath)
     {
         if(substr($tagPath, 0, 1) !== '/'){
             $tagPath = $this->getCurrentPath($tagPath);
         }
 
-        return $this->handlers->get($tagPath);
+        return $tagPath;
+    }
+
+    public function moveToEnd()
+    {
+        if($this->valid() === null){
+            $this->next();
+        }
+        while($this->valid()){
+            $this->next();
+        }
     }
 
     public function moveToNextElement(): bool
@@ -184,8 +211,8 @@ final class SherpaXML implements \Iterator
     public function getCurrentPath(string $path = null): string
     {
         $elementsStack = $this->elementsStack;
-        if($path){
-            $elementsStack[] = ['name' => rtrim($path, '/')];
+        if($path && ($name = rtrim($path, '/'))){
+            $elementsStack[] = ['name' => $name];
         }
 
         return '/'.implode('/', array_map(function(array $elementData){

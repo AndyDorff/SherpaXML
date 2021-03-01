@@ -178,5 +178,4 @@ class ParserSpec extends ObjectBehavior
         $result->payload['letter']->salutation->shouldBe('Dear Daniel,');
         $result->payload['letter']->component->shouldBe('Separator');
     }
-
 }

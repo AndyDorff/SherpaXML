@@ -3,13 +3,10 @@
 namespace AndyDorff\SherpaXML;
 
 use AndyDorff\SherpaXML\Interpreters\AbstractInterpreter;
-use AndyDorff\SherpaXML\Interpreters\SherpaXMLInterpreter;
 use AndyDorff\SherpaXML\Interpreters\SimpleXMLInterpreter;
 use AndyDorff\SherpaXML\Misc\DeferredHandler;
 use AndyDorff\SherpaXML\Misc\ParseResult;
-use JetBrains\PhpStorm\ArrayShape;
 use ReflectionFunction;
-use XMLReader;
 
 final class Parser
 {
@@ -73,16 +70,19 @@ final class Parser
             $xml->moveToNextElement()
             && !$this->isBreaked
         ){
-            $this->doParse($xml);
+            do{
+                $oneMore = $this->doParse($xml);
+            } while ($oneMore);
         }
 
         return $this->parseResult;
     }
 
-    private function doParse(SherpaXML $xml): void
+    private function doParse(SherpaXML $xml): bool
     {
         $this->parseResult->totalCount++;
-        if($handler = $xml->getHandler($xml->getCurrentPath())){
+        $elementPath = $xml->getCurrentPath();
+        if($handler = $xml->extractHandler($elementPath)){
             [$params, $deferredHandler] = $this->resolveHandleParams($handler->asClosure(), $xml);
             if($deferredHandler){
                 $deferredHandler->setHandler($handler, $params);
@@ -93,6 +93,8 @@ final class Parser
             }
             $this->parseResult->parseCount++;
         }
+
+        return ($xml->getHandler($elementPath) !== null);
     }
 
     /**

@@ -140,4 +140,43 @@ class ParserSpec extends ObjectBehavior
         ]);
     }
 
+    function it_should_use_already_ready_handler_params()
+    {
+        $interpreter = new class extends AbstractInterpreter{
+
+            public function className(): string
+            {
+                return \stdClass::class;
+            }
+
+            public function interpret(SherpaXML $xml)
+            {
+                $dto = (object)['title' => null, 'salutation' => null, 'component' => null];
+                $xml->on('title', fn(SherpaXML $xml) => $dto->title = $xml->xmlReader()->readInnerXml());
+                $xml->on('salutation', fn(SherpaXML $xml) => $dto->salutation = $xml->xmlReader()->readInnerXml());
+                $xml->on('component', fn(SherpaXML $xml) => $dto->component = $xml->xmlReader()->readInnerXml());
+
+                return $dto;
+            }
+
+            public function isReady(\stdClass $dto): bool
+            {
+                return isset($dto->title, $dto->salutation, $dto->component);
+            }
+        };
+
+        $this->beConstructedWith([$interpreter]);
+
+        $this->xml->on('letter', function(\stdClass $letter, Parser $parser){
+            $parser->parseResult()->payload['letter'] = $letter;
+            $parser->break();
+        });
+
+        $result = $this->parse($this->xml);
+
+        $result->payload['letter']->title->shouldBe(' Quote Letter ');
+        $result->payload['letter']->salutation->shouldBe('Dear Daniel,');
+        $result->payload['letter']->component->shouldBe('Separator');
+    }
+
 }

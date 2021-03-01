@@ -5,7 +5,9 @@ namespace AndyDorff\SherpaXML;
 use AndyDorff\SherpaXML\Interpreters\AbstractInterpreter;
 use AndyDorff\SherpaXML\Interpreters\SherpaXMLInterpreter;
 use AndyDorff\SherpaXML\Interpreters\SimpleXMLInterpreter;
+use AndyDorff\SherpaXML\Misc\DeferredHandler;
 use AndyDorff\SherpaXML\Misc\ParseResult;
+use JetBrains\PhpStorm\ArrayShape;
 use ReflectionFunction;
 use XMLReader;
 
@@ -17,6 +19,10 @@ final class Parser
      */
     private array $interpreters = [];
     private bool $isBreaked = false;
+    /**
+     * @var DeferredHandler[]
+     */
+    private array $deferred = [];
 
     public function __construct(array $interpreters = [])
     {
@@ -77,13 +83,25 @@ final class Parser
     {
         $this->parseResult->totalCount++;
         if($handler = $xml->getHandler($xml->getCurrentPath())){
-            $params = $this->resolveHandleParams($handler->asClosure(), $xml);
-            $handler->__invoke(...$params);
+            [$params, $deferredHandler] = $this->resolveHandleParams($handler->asClosure(), $xml);
+            if($deferredHandler){
+                $deferredHandler->setHandler($handler, $params);
+                $this->deferred[] = $deferredHandler;
+            } else {
+                $handler->__invoke(...$params);
+                $this->invokeDeferredHandlers();
+            }
             $this->parseResult->parseCount++;
         }
     }
 
-    private function resolveHandleParams(\Closure $handle, SherpaXML $xml)
+    /**
+     * @param \Closure $handle
+     * @param SherpaXML $xml
+     * @return array
+     * @throws \ReflectionException
+     */
+    private function resolveHandleParams(\Closure $handle, SherpaXML $xml): array
     {
         $result = [];
         $handle = new ReflectionFunction($handle);
@@ -97,11 +115,24 @@ final class Parser
                 $result[$key] = $xml;
             } elseif ($interpreter = $this->getInterpreter($name)){
                 $result[$key] = $interpreter->interpret($xml);
+                if(method_exists($interpreter, 'isReady')){
+                    $deferredHandler = new DeferredHandler($interpreter, $result[$key]);
+                }
             } else {
                 $result[$key] = null;
             }
         }
 
-        return $result;
+        return [$result, $deferredHandler ?? null];
+    }
+
+    private function invokeDeferredHandlers(): void
+    {
+        foreach($this->deferred as $index => $deferredHandler){
+            if($deferredHandler->isReady()){
+                $deferredHandler->invoke();
+                unset($this->deferred[$index]);
+            }
+        }
     }
 }

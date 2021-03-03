@@ -78,7 +78,6 @@ final class Parser
         }
         //Edge case: On parse end -- invoke all remaining handlers
         //dd(array_map(fn($h) => $h->tagPath(),  $this->handlers));
-
         $this->completeRemainingHandlers();
 
         return $this->parseResult;
@@ -143,12 +142,12 @@ final class Parser
     {
         $index = 0;
         while($currHandler = ($this->handlers[$index] ?? null)){
-            $currHandler->invoke();
             $prevHandler = ($index > 0 ? $this->handlers[$index - 1] : null);
             if($prevHandler && !$currHandler->isNestedFor($prevHandler)){
                 $prevHandler->complete();
                 array_splice($this->handlers, --$index, 1);
             } else {
+                $currHandler->invoke();
                 $index++;
             }
         }

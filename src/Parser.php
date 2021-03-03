@@ -77,6 +77,8 @@ final class Parser
             } while ($oneMore);
         }
         //Edge case: On parse end -- invoke all remaining handlers
+        //dd(array_map(fn($h) => $h->tagPath(),  $this->handlers));
+
         $this->completeRemainingHandlers();
 
         return $this->parseResult;
@@ -139,24 +141,28 @@ final class Parser
 
     private function invokeHandlers(): void
     {
-        $prevHandler = null;
-        foreach($this->handlers as $index => $handlerManager){
-            $handlerManager->invoke();
-            if($prevHandler && !$handlerManager->isNestedFor($prevHandler)){
+        $index = 0;
+        while($currHandler = ($this->handlers[$index] ?? null)){
+            $currHandler->invoke();
+            $prevHandler = ($index > 0 ? $this->handlers[$index - 1] : null);
+            if($prevHandler && !$currHandler->isNestedFor($prevHandler)){
                 $prevHandler->complete();
-                unset($this->handlers[$index - 1]);
+                array_splice($this->handlers, --$index, 1);
+            } else {
+                $index++;
             }
-            $prevHandler = $handlerManager;
         }
     }
 
     private function completeRemainingHandlers(): void
     {
-        foreach($this->handlers as $handlerManager){
+        $index = count($this->handlers);
+        while($index){
+            $handlerManager = $this->handlers[--$index];
             $handlerManager->invoke(true);
             $handlerManager->complete();
-        }
 
+        }
         $this->handlers = [];
     }
 }

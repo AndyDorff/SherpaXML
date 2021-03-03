@@ -46,7 +46,7 @@ final class HandlerManager
 
     public function isNestedFor(HandlerManager $prevHandler): bool
     {
-        return (strpos($this->tagPath, $prevHandler->tagPath()) !== false);
+        return ($this->tagPath !== $prevHandler->tagPath && strpos($this->tagPath, $prevHandler->tagPath()) !== false);
     }
 
     public function waitForInterpreter(AbstractInterpreter $interpreter, $result): void

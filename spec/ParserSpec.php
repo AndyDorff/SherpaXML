@@ -3,6 +3,7 @@
 namespace spec\AndyDorff\SherpaXML;
 
 use AndyDorff\SherpaXML\Handler\AbstractHandler;
+use AndyDorff\SherpaXML\Handler\Handler;
 use AndyDorff\SherpaXML\Interpreters\AbstractInterpreter;
 use AndyDorff\SherpaXML\Misc\ParseResult;
 use AndyDorff\SherpaXML\Parser;
@@ -188,6 +189,52 @@ class ParserSpec extends ObjectBehavior
         $result = $this->parse($this->xml);
 
         $result->payload['emphasis']->shouldBe('SDL Trados Studio 2009');
+    }
+
+    function it_should_call_handle_completed_method_at_the_end_of_node_parsing()
+    {
+        $this->xml->on('letter/text', function(SherpaXML $xml, Handler $handler, ParseResult $result){
+            $result->payload['completed'] = false;
+
+            $xml->on('/emphasis', function(ParseResult $result){
+            });
+
+            $handler->onComplete(function() use ($result){
+                $result->payload['completed'] = true;
+            });
+        });
+
+        $result = $this->parse($this->xml);
+
+        $result->payload['completed']->shouldBe(true);
+        $result->parseCount->shouldBe(2);
+        $result->totalCount->shouldBe(15);
+    }
+
+    function it_should_call_Handler_completed_method_at_the_end_of_node_parsing()
+    {
+        $handler = new class extends AbstractHandler{
+            private ParseResult $parseResult;
+            public function handle(SherpaXML $xml, ParseResult $result)
+            {
+                $this->parseResult = $result;
+                $this->parseResult->payload['completed'] = false;
+
+                $xml->on('/emphasis', function(ParseResult $result){});
+            }
+
+            public function completed(): void
+            {
+                $this->parseResult->payload['completed'] = true;
+            }
+        };
+        $this->xml->on('letter/text', $handler);
+
+        $result = $this->parse($this->xml);
+
+        $result->payload['completed']->shouldBe(true);
+        $result->parseCount->shouldBe(2);
+        $result->totalCount->shouldBe(15);
     }
 
 }
